@@ -17,13 +17,13 @@ export const getRoseDayWish = (recipient: string, color: RoseColor) => {
 };
 
 export const getRoseImagePath = (color: RoseColor) => {
-  // Mapping to asset files located in the 'assets/' folder
+  // Using explicit relative path ./assets/
   const colorMap: Record<RoseColor, string> = {
-    [RoseColor.RED]: 'assets/red.jpg',
-    [RoseColor.PINK]: 'assets/pink.jpg',
-    [RoseColor.YELLOW]: 'assets/yellow.jpg',
-    [RoseColor.WHITE]: 'assets/white.jpg',
-    [RoseColor.BLUE]: 'assets/blue.jpg'
+    [RoseColor.RED]: './assets/red.jpg',
+    [RoseColor.PINK]: './assets/pink.jpg',
+    [RoseColor.YELLOW]: './assets/yellow.jpg',
+    [RoseColor.WHITE]: './assets/white.jpg',
+    [RoseColor.BLUE]: './assets/blue.jpg'
   };
   return colorMap[color];
 };
