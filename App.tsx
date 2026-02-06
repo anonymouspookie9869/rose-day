@@ -5,7 +5,7 @@ import { getRoseDayWish, getRoseImagePath } from './services/geminiService';
 import { PetalOverlay } from './components/PetalOverlay';
 import { InteractiveRose } from './components/InteractiveRose';
 import HeartCanvas from './components/HeartCanvas';
-import { Heart, Sparkles, Flower2, ArrowRight, RotateCcw, Star, Play, Music4, Quote } from 'lucide-react';
+import { Heart, Sparkles, Flower2, ArrowRight, RotateCcw, Star, Play, Music4, Quote, Pause } from 'lucide-react';
 
 type Step = 'intro' | 'choice' | 'blooming' | 'reveal';
 
@@ -103,8 +103,6 @@ const App: React.FC = () => {
 
   const handleChoice = (color: RoseColor) => {
     setSelectingColor(color);
-    
-    // Brief delay to allow the selection animation to play
     setTimeout(() => {
       setSelectedColor(color);
       setStep('blooming');
@@ -131,7 +129,6 @@ const App: React.FC = () => {
   const handleBloomTouch = (e: any) => {
     spawnHearts(e);
     setIsRoseBloomed(true);
-    // Increased from 1800ms to 4500ms to let the animation and text breathe
     setTimeout(() => setStep('reveal'), 4500);
   };
 
@@ -269,82 +266,74 @@ const App: React.FC = () => {
       )}
 
       {step === 'reveal' && wish && (
-        <div className="z-10 w-full max-w-7xl px-6 flex flex-col lg:flex-row items-center gap-16 lg:gap-24 animate-in fade-in slide-in-from-bottom-20 duration-1000 pb-32 pt-10">
-          <div className="w-full lg:w-1/2 max-w-xl mx-auto space-y-12">
-             <div className="group relative aspect-[4/5] rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(220,38,38,0.3)] border-[15px] border-white transition-all hover:scale-[1.02] duration-1000">
+        <div className="z-10 w-full max-w-7xl px-6 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 animate-in fade-in slide-in-from-bottom-20 duration-1000 pb-32 pt-10">
+          <div className="w-full lg:w-1/2 max-w-lg mx-auto flex flex-col items-center gap-10">
+             <div className="group relative aspect-[4/5] w-full rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(220,38,38,0.3)] border-[12px] border-white transition-all hover:scale-[1.02] duration-1000 bg-pink-100 flex items-center justify-center">
                 <img 
                   src={wish.imageUrl} 
                   className="w-full h-full object-cover transform transition-transform duration-[15s] hover:scale-110" 
-                  alt="Vanshika's Special Rose" 
-                  onError={(e) => { (e.target as any).src = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80' }}
+                  alt="Rose for Vanshika" 
+                  onError={(e) => { 
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    const parent = (e.target as HTMLElement).parentElement;
+                    if(parent) parent.innerHTML = '<div class="flex flex-col items-center gap-4 text-pink-400 font-romantic text-3xl p-10 text-center"><p>Missing your rose file</p><p class="text-xl">Please upload ' + wish.imageUrl + ' to the folder</p></div>';
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
              </div>
              
-             <div className="bg-white/95 backdrop-blur-3xl p-10 rounded-[3rem] border-2 border-pink-100 shadow-2xl group relative overflow-hidden">
-                <div className="relative z-10 flex flex-col items-center gap-6">
-                  <div className="flex items-center gap-4">
-                    <Heart size={24} className="text-pink-500 fill-pink-500" />
-                    <p className="text-pink-900 font-romantic text-4xl text-center">For Vanshika</p>
-                    <Heart size={24} className="text-pink-500 fill-pink-500" />
-                  </div>
-                  
-                  <button 
-                    onMouseEnter={playHoverSound}
-                    onClick={toggleCustomSong}
-                    className={`w-full flex items-center justify-center gap-6 py-6 rounded-full font-black transition-all shadow-xl active:scale-95 text-2xl ${
-                      isCustomSongPlaying 
-                        ? 'bg-white text-pink-600 border-2 border-pink-200' 
-                        : 'bg-gradient-to-br from-red-500 to-rose-600 text-white hover:brightness-110'
-                    }`}
-                  >
-                    {isCustomSongPlaying ? (
-                      <>
-                        <div className="flex gap-2 items-end h-6">
-                          {[0.3, 0.6, 1, 0.4].map((d, i) => (
-                            <div key={i} className="w-2 bg-pink-600 rounded-full animate-bounce" style={{ animationDuration: `${d}s` }}></div>
-                          ))}
-                        </div>
-                        <span>Pause</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play size={30} className="fill-current" />
-                        <span>I have made a song for you</span>
-                      </>
-                    )}
-                  </button>
-                </div>
+             {/* Highlighted Song Button */}
+             <div className="w-full bg-white/80 backdrop-blur-3xl p-6 rounded-[2.5rem] border-2 border-pink-200 shadow-xl group relative overflow-hidden">
+                <button 
+                  onMouseEnter={playHoverSound}
+                  onClick={toggleCustomSong}
+                  className={`w-full flex items-center justify-center gap-4 py-8 rounded-[2rem] font-black transition-all shadow-2xl active:scale-95 text-3xl group ${
+                    isCustomSongPlaying 
+                      ? 'bg-pink-50 text-pink-600 border-2 border-pink-400' 
+                      : 'bg-gradient-to-br from-red-600 via-rose-500 to-pink-500 text-white animate-pulse-soft hover:brightness-110'
+                  }`}
+                >
+                  {isCustomSongPlaying ? (
+                    <>
+                      <Pause size={40} className="fill-current" />
+                      <span>Pause Our Song</span>
+                    </>
+                  ) : (
+                    <>
+                      <Music4 size={40} className="animate-bounce" />
+                      <span>Play Our Special Song</span>
+                    </>
+                  )}
+                </button>
              </div>
           </div>
 
-          <div className="w-full lg:w-1/2 space-y-12 text-center lg:text-left">
-             <div className="space-y-4">
-               <div className="h-2 w-24 bg-red-600 rounded-full mx-auto lg:mx-0"></div>
-               <h3 className="text-red-950 italic text-5xl sm:text-6xl font-romantic leading-tight">My Sweetheart...</h3>
+          <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+             <div className="space-y-2">
+               <div className="h-1.5 w-16 bg-red-600 rounded-full mx-auto lg:mx-0 mb-4"></div>
+               <h3 className="text-red-950 italic text-5xl sm:text-6xl font-romantic leading-tight drop-shadow-sm">My Sweetheart...</h3>
              </div>
              
-             <div className="relative group">
-               <Quote className="absolute -top-10 -left-10 text-pink-200 w-20 h-20 opacity-20" />
-               <p className="text-3xl sm:text-4xl md:text-5xl font-romantic text-red-950 leading-[1.4] italic drop-shadow-sm">
+             <div className="relative group py-4">
+               <Quote className="absolute -top-6 -left-6 text-pink-200 w-16 h-16 opacity-30" />
+               <p className="text-2xl sm:text-3xl md:text-4xl font-romantic text-red-950 leading-[1.6] italic drop-shadow-sm px-4 lg:px-0">
                  {wish.message}
                </p>
              </div>
 
-             <div className="flex flex-col sm:flex-row gap-6 pt-10 justify-center lg:justify-start">
+             <div className="flex flex-col sm:flex-row gap-6 pt-6 justify-center lg:justify-start">
                 <button 
                   onMouseEnter={playHoverSound}
                   onClick={(e) => { e.stopPropagation(); spawnHearts(e); stopAllAudio(); setStep('choice'); }}
-                  className="flex items-center justify-center gap-6 px-12 py-6 bg-white/90 border-4 border-white text-red-600 rounded-full hover:bg-white shadow-xl transition-all active:scale-90 group"
+                  className="flex items-center justify-center gap-4 px-10 py-5 bg-white/90 border-2 border-pink-100 text-red-600 rounded-full hover:bg-white shadow-lg transition-all active:scale-90 group text-xl font-black"
                 >
-                  <RotateCcw size={32} className="group-hover:rotate-180 transition-transform duration-700" />
-                  <span className="text-2xl font-black">Choose Another</span>
+                  <RotateCcw size={24} className="group-hover:rotate-180 transition-transform duration-700" />
+                  <span>Choose Another</span>
                 </button>
              </div>
              
-             <div className="pt-10 border-t border-pink-100/50 inline-block w-full">
-               <p className="font-montserrat text-gray-400 text-[10px] tracking-[0.5em] uppercase">Handcrafted with Love for Vanshika ✨</p>
-               <p className="text-pink-300 text-[9px] mt-2 font-montserrat tracking-widest italic opacity-60">By Your Mad Head 😌</p>
+             <div className="pt-12 border-t border-pink-100/30 inline-block w-full">
+               <p className="font-montserrat text-gray-400 text-[9px] tracking-[0.4em] uppercase">Handcrafted for Vanshika with Eternal Love ✨</p>
+               <p className="text-pink-300 text-[9px] mt-1 font-montserrat tracking-widest italic opacity-50">By Your Favorite Person 😌</p>
              </div>
           </div>
         </div>
