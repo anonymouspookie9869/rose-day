@@ -23,8 +23,8 @@ interface FloatingHeart {
   color: string;
 }
 
-// Explicit relative path for the audio
-const CUSTOM_SONG_URL = './assets/audio.mp3'; 
+// Using direct GitHub Raw URL for the audio
+const CUSTOM_SONG_URL = 'https://raw.githubusercontent.com/anonymouspookie9869/rose-day/main/assets/audio.mp3'; 
 const RECIPIENT_NAME = "Vanshika";
 
 const App: React.FC = () => {
@@ -41,7 +41,6 @@ const App: React.FC = () => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const [isCustomSongPlaying, setIsCustomSongPlaying] = useState(false);
 
-  // Initialize audio
   useEffect(() => {
     const audio = new Audio(CUSTOM_SONG_URL);
     audio.loop = true;
@@ -146,7 +145,7 @@ const App: React.FC = () => {
       customAudioRef.current.pause();
       setIsCustomSongPlaying(false);
     } else {
-      customAudioRef.current.play().catch(err => console.warn(err));
+      customAudioRef.current.play().catch(err => console.warn("Interaction required for audio"));
       setIsCustomSongPlaying(true);
     }
   };
@@ -293,9 +292,9 @@ const App: React.FC = () => {
                     if(parent) {
                       parent.innerHTML = `
                         <div class="flex flex-col items-center gap-4 text-pink-400 font-romantic text-3xl p-10 text-center">
-                          <p>File Not Found</p>
-                          <p class="text-xl">Trying to load: <b>${wish.imageUrl}</b></p>
-                          <p class="text-xs opacity-60">Verify your 'assets' folder has '${wish.imageUrl?.split('/').pop()}'</p>
+                          <p>File Error</p>
+                          <p class="text-xl">Trying direct URL:</p>
+                          <p class="text-[10px] break-all opacity-60">${wish.imageUrl}</p>
                         </div>`;
                     }
                   }}
