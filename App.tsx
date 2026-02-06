@@ -23,7 +23,7 @@ interface FloatingHeart {
   color: string;
 }
 
-const CUSTOM_SONG_URL = 'audio.mp3'; 
+const CUSTOM_SONG_URL = 'assets/audio.mp3'; 
 const RECIPIENT_NAME = "Vanshika";
 
 const App: React.FC = () => {
@@ -276,7 +276,7 @@ const App: React.FC = () => {
                   onError={(e) => { 
                     (e.target as HTMLImageElement).style.display = 'none';
                     const parent = (e.target as HTMLElement).parentElement;
-                    if(parent) parent.innerHTML = '<div class="flex flex-col items-center gap-4 text-pink-400 font-romantic text-3xl p-10 text-center"><p>Missing your rose file</p><p class="text-xl">Please upload ' + wish.imageUrl + ' to the folder</p></div>';
+                    if(parent) parent.innerHTML = '<div class="flex flex-col items-center gap-4 text-pink-400 font-romantic text-3xl p-10 text-center"><p>Missing your rose file</p><p class="text-xl">Please upload ' + wish.imageUrl + ' to the assets folder</p></div>';
                   }}
                 />
              </div>
