@@ -5,7 +5,7 @@ import { getRoseDayWish, getRoseImagePath } from './services/geminiService';
 import { PetalOverlay } from './components/PetalOverlay';
 import { InteractiveRose } from './components/InteractiveRose';
 import HeartCanvas from './components/HeartCanvas';
-import { Heart, Sparkles, Flower2, ArrowRight, RotateCcw, Star, Music4, Quote, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Heart, Sparkles, Flower2, ArrowRight, RotateCcw, Star, Music4, Quote, Pause, VolumeX } from 'lucide-react';
 
 type Step = 'intro' | 'choice' | 'blooming' | 'reveal';
 
@@ -23,8 +23,8 @@ interface FloatingHeart {
   color: string;
 }
 
-// Ensure these match your folder structure: assets/audio.mp3, assets/red.jpg, etc.
-const CUSTOM_SONG_URL = 'assets/audio.mp3'; 
+// Explicit relative path for the audio
+const CUSTOM_SONG_URL = './assets/audio.mp3'; 
 const RECIPIENT_NAME = "Vanshika";
 
 const App: React.FC = () => {
@@ -41,7 +41,7 @@ const App: React.FC = () => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const [isCustomSongPlaying, setIsCustomSongPlaying] = useState(false);
 
-  // Initialize audio on mount
+  // Initialize audio
   useEffect(() => {
     const audio = new Audio(CUSTOM_SONG_URL);
     audio.loop = true;
@@ -70,9 +70,7 @@ const App: React.FC = () => {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.1);
-    } catch (e) {
-      // Audio context might be blocked by browser until user interaction
-    }
+    } catch (e) {}
   }, []);
 
   const spawnHearts = (e: any) => {
@@ -148,9 +146,7 @@ const App: React.FC = () => {
       customAudioRef.current.pause();
       setIsCustomSongPlaying(false);
     } else {
-      customAudioRef.current.play().catch(err => {
-        console.warn("Audio playback failed - interaction needed:", err);
-      });
+      customAudioRef.current.play().catch(err => console.warn(err));
       setIsCustomSongPlaying(true);
     }
   };
@@ -176,7 +172,6 @@ const App: React.FC = () => {
       
       <PetalOverlay roseColor={step !== 'intro' ? selectedColor : undefined} />
 
-      {/* Floating Sparkles and Hearts */}
       {trail.map(t => (
         <div key={t.id} className="absolute pointer-events-none z-[100] animate-sparkle-trail" style={{ left: t.x, top: t.y, transform: `translate(-50%, -50%) scale(${t.scale})` }}>
           <Star size={14} className="text-pink-400 fill-pink-200 opacity-60" />
@@ -188,7 +183,6 @@ const App: React.FC = () => {
         </div>
       ))}
 
-      {/* Custom Cursor */}
       <div className="hidden md:block fixed pointer-events-none z-[200]" id="custom-cursor">
         <div className="relative">
           <Heart size={28} className="text-red-500 fill-red-400 animate-pulse-soft" />
@@ -196,7 +190,6 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Persistent Floating Music Button (Hidden on Intro) */}
       {step !== 'intro' && (
         <div className="fixed top-6 right-6 z-[300] animate-in fade-in zoom-in duration-700">
           <button
@@ -208,9 +201,6 @@ const App: React.FC = () => {
             }`}
           >
             {isCustomSongPlaying ? <Music4 size={32} /> : <VolumeX size={32} />}
-            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest font-black whitespace-nowrap">
-              {isCustomSongPlaying ? 'Playing Song' : 'Play Music'}
-            </span>
           </button>
         </div>
       )}
@@ -244,18 +234,18 @@ const App: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 md:gap-10 px-4">
             {[
-              { color: RoseColor.RED, label: 'Red', desc: 'True Love', iconColor: 'text-red-600' },
-              { color: RoseColor.PINK, label: 'Pink', desc: 'Grace', iconColor: 'text-pink-400' },
-              { color: RoseColor.YELLOW, label: 'Yellow', desc: 'Friendship', iconColor: 'text-yellow-400' },
-              { color: RoseColor.WHITE, label: 'White', desc: 'Purity', iconColor: 'text-slate-400' },
-              { color: RoseColor.BLUE, label: 'Blue', desc: 'Mystery', iconColor: 'text-blue-500' },
+              { color: RoseColor.RED, label: 'Red', iconColor: 'text-red-600' },
+              { color: RoseColor.PINK, label: 'Pink', iconColor: 'text-pink-400' },
+              { color: RoseColor.YELLOW, label: 'Yellow', iconColor: 'text-yellow-400' },
+              { color: RoseColor.WHITE, label: 'White', iconColor: 'text-slate-400' },
+              { color: RoseColor.BLUE, label: 'Blue', iconColor: 'text-blue-500' },
             ].map((r) => {
               const isSelected = selectingColor === r.color;
               return (
                 <button
                   key={r.color}
                   onMouseEnter={playHoverSound}
-                  onClick={(e) => { e.stopPropagation(); spawnHearts(e); handleChoice(r.color); }}
+                  onClick={(e) => { e.stopPropagation(); spawnHearts(e); handleChoice(r.color as RoseColor); }}
                   className={`group flex flex-col items-center gap-4 p-8 rounded-[4rem] bg-white/80 backdrop-blur-3xl border-4 transition-all duration-300 
                     ${isSelected 
                       ? 'scale-110 border-pink-400 ring-8 ring-pink-400/30 shadow-[0_0_50px_rgba(244,114,182,0.8)]' 
@@ -264,7 +254,6 @@ const App: React.FC = () => {
                 >
                   <div className="relative">
                     <Flower2 className={`w-16 h-16 md:w-24 md:h-24 ${r.iconColor} group-hover:rotate-[25deg] transition-transform duration-700`} />
-                    <Heart className={`absolute -top-4 -right-4 w-8 h-8 text-red-500 fill-red-500 transition-all duration-500 ${isSelected ? 'opacity-100 scale-125' : 'opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100'} animate-bounce`} />
                   </div>
                   <span className={`font-romantic text-3xl transition-colors duration-300 ${isSelected ? 'text-pink-600' : 'text-red-950'}`}>
                     {r.label}
@@ -282,13 +271,11 @@ const App: React.FC = () => {
             <div className="absolute inset-0 bg-red-400/10 blur-[100px] rounded-full animate-pulse transition-all"></div>
             <InteractiveRose isBloomed={isRoseBloomed} />
           </div>
-          <div className="text-center space-y-6">
-            {!isRoseBloomed && (
-              <h2 className="text-4xl sm:text-6xl font-romantic text-red-900 italic animate-pulse leading-none px-4 mt-10">
-                {loadingText}
-              </h2>
-            )}
-          </div>
+          {!isRoseBloomed && (
+            <h2 className="text-4xl sm:text-6xl font-romantic text-red-900 italic animate-pulse leading-none px-4 mt-10">
+              {loadingText}
+            </h2>
+          )}
         </div>
       )}
 
@@ -306,35 +293,29 @@ const App: React.FC = () => {
                     if(parent) {
                       parent.innerHTML = `
                         <div class="flex flex-col items-center gap-4 text-pink-400 font-romantic text-3xl p-10 text-center">
-                          <p>Image Not Found</p>
-                          <p class="text-xl">Make sure you created an 'assets' folder and put <b>${wish.imageUrl?.split('/').pop()}</b> inside it.</p>
+                          <p>File Not Found</p>
+                          <p class="text-xl">Trying to load: <b>${wish.imageUrl}</b></p>
+                          <p class="text-xs opacity-60">Verify your 'assets' folder has '${wish.imageUrl?.split('/').pop()}'</p>
                         </div>`;
                     }
                   }}
                 />
              </div>
              
-             {/* Large Song Toggle Button */}
-             <div className="w-full bg-white/80 backdrop-blur-3xl p-6 rounded-[2.5rem] border-2 border-pink-200 shadow-xl group relative overflow-hidden">
+             <div className="w-full bg-white/80 backdrop-blur-3xl p-6 rounded-[2.5rem] border-2 border-pink-200 shadow-xl">
                 <button 
                   onMouseEnter={playHoverSound}
                   onClick={toggleCustomSong}
                   className={`w-full flex items-center justify-center gap-4 py-8 rounded-[2rem] font-black transition-all shadow-2xl active:scale-95 text-3xl group ${
                     isCustomSongPlaying 
                       ? 'bg-pink-50 text-pink-600 border-2 border-pink-400' 
-                      : 'bg-gradient-to-br from-red-600 via-rose-500 to-pink-500 text-white animate-pulse-soft hover:brightness-110'
+                      : 'bg-gradient-to-br from-red-600 via-rose-500 to-pink-500 text-white animate-pulse-soft'
                   }`}
                 >
                   {isCustomSongPlaying ? (
-                    <>
-                      <Pause size={40} className="fill-current" />
-                      <span>Pause Our Song</span>
-                    </>
+                    <><Pause size={40} /><span>Stop Song</span></>
                   ) : (
-                    <>
-                      <Music4 size={40} className="animate-bounce" />
-                      <span>Play Our Special Song</span>
-                    </>
+                    <><Music4 size={40} className="animate-bounce" /><span>Play Our Song</span></>
                   )}
                 </button>
              </div>
@@ -343,12 +324,12 @@ const App: React.FC = () => {
           <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
              <div className="space-y-2">
                <div className="h-1.5 w-16 bg-red-600 rounded-full mx-auto lg:mx-0 mb-4"></div>
-               <h3 className="text-red-950 italic text-5xl sm:text-6xl font-romantic leading-tight drop-shadow-sm">My Sweetheart...</h3>
+               <h3 className="text-red-950 italic text-5xl sm:text-6xl font-romantic leading-tight">My Sweetheart...</h3>
              </div>
              
              <div className="relative group py-4">
                <Quote className="absolute -top-6 -left-6 text-pink-200 w-16 h-16 opacity-30" />
-               <p className="text-2xl sm:text-3xl md:text-4xl font-romantic text-red-950 leading-[1.6] italic drop-shadow-sm px-4 lg:px-0">
+               <p className="text-2xl sm:text-3xl md:text-4xl font-romantic text-red-950 leading-[1.6] italic px-4 lg:px-0">
                  {wish.message}
                </p>
              </div>
@@ -356,21 +337,16 @@ const App: React.FC = () => {
              <div className="flex flex-col sm:flex-row gap-6 pt-6 justify-center lg:justify-start">
                 <button 
                   onMouseEnter={playHoverSound}
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    spawnHearts(e); 
-                    setStep('choice'); 
-                  }}
-                  className="flex items-center justify-center gap-4 px-10 py-5 bg-white/90 border-2 border-pink-100 text-red-600 rounded-full hover:bg-white shadow-lg transition-all active:scale-90 group text-xl font-black"
+                  onClick={(e) => { e.stopPropagation(); spawnHearts(e); setStep('choice'); }}
+                  className="flex items-center justify-center gap-4 px-10 py-5 bg-white border-2 border-pink-100 text-red-600 rounded-full shadow-lg transition-all active:scale-90 text-xl font-black"
                 >
-                  <RotateCcw size={24} className="group-hover:rotate-180 transition-transform duration-700" />
+                  <RotateCcw size={24} />
                   <span>Choose Another</span>
                 </button>
              </div>
              
-             <div className="pt-12 border-t border-pink-100/30 inline-block w-full">
+             <div className="pt-12 border-t border-pink-100/30 inline-block w-full opacity-60">
                <p className="font-montserrat text-gray-400 text-[9px] tracking-[0.4em] uppercase">Handcrafted for Vanshika with Eternal Love ✨</p>
-               <p className="text-pink-300 text-[9px] mt-1 font-montserrat tracking-widest italic opacity-50">By Your Favorite Person 😌</p>
              </div>
           </div>
         </div>
