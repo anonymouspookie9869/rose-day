@@ -5,7 +5,7 @@ import { getRoseDayWish, getRoseImagePath } from './services/geminiService';
 import { PetalOverlay } from './components/PetalOverlay';
 import { InteractiveRose } from './components/InteractiveRose';
 import HeartCanvas from './components/HeartCanvas';
-import { Heart, Sparkles, Flower2, ArrowRight, RotateCcw, Star, Play, Music4, Quote, Pause } from 'lucide-react';
+import { Heart, Sparkles, Flower2, ArrowRight, RotateCcw, Star, Music4, Quote, Pause, Volume2, VolumeX } from 'lucide-react';
 
 type Step = 'intro' | 'choice' | 'blooming' | 'reveal';
 
@@ -23,6 +23,7 @@ interface FloatingHeart {
   color: string;
 }
 
+// Ensure these match your folder structure: assets/audio.mp3, assets/red.jpg, etc.
 const CUSTOM_SONG_URL = 'assets/audio.mp3'; 
 const RECIPIENT_NAME = "Vanshika";
 
@@ -40,11 +41,15 @@ const App: React.FC = () => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const [isCustomSongPlaying, setIsCustomSongPlaying] = useState(false);
 
+  // Initialize audio on mount
   useEffect(() => {
-    customAudioRef.current = new Audio(CUSTOM_SONG_URL);
-    customAudioRef.current.loop = true;
+    const audio = new Audio(CUSTOM_SONG_URL);
+    audio.loop = true;
+    customAudioRef.current = audio;
+    
     return () => {
-      customAudioRef.current?.pause();
+      audio.pause();
+      customAudioRef.current = null;
     };
   }, []);
 
@@ -66,7 +71,7 @@ const App: React.FC = () => {
       osc.start();
       osc.stop(ctx.currentTime + 0.1);
     } catch (e) {
-      console.warn("Audio Context could not start", e);
+      // Audio context might be blocked by browser until user interaction
     }
   }, []);
 
@@ -132,19 +137,20 @@ const App: React.FC = () => {
     setTimeout(() => setStep('reveal'), 4500);
   };
 
-  const stopAllAudio = useCallback(() => {
-    customAudioRef.current?.pause();
-    setIsCustomSongPlaying(false);
-  }, []);
-
-  const toggleCustomSong = (e: any) => {
-    spawnHearts(e);
+  const toggleCustomSong = (e?: any) => {
+    if (e) {
+      e.stopPropagation();
+      spawnHearts(e);
+    }
     if (!customAudioRef.current) return;
+    
     if (isCustomSongPlaying) {
       customAudioRef.current.pause();
       setIsCustomSongPlaying(false);
     } else {
-      customAudioRef.current.play().catch(e => console.error("Playback failed", e));
+      customAudioRef.current.play().catch(err => {
+        console.warn("Audio playback failed - interaction needed:", err);
+      });
       setIsCustomSongPlaying(true);
     }
   };
@@ -170,6 +176,7 @@ const App: React.FC = () => {
       
       <PetalOverlay roseColor={step !== 'intro' ? selectedColor : undefined} />
 
+      {/* Floating Sparkles and Hearts */}
       {trail.map(t => (
         <div key={t.id} className="absolute pointer-events-none z-[100] animate-sparkle-trail" style={{ left: t.x, top: t.y, transform: `translate(-50%, -50%) scale(${t.scale})` }}>
           <Star size={14} className="text-pink-400 fill-pink-200 opacity-60" />
@@ -181,12 +188,32 @@ const App: React.FC = () => {
         </div>
       ))}
 
+      {/* Custom Cursor */}
       <div className="hidden md:block fixed pointer-events-none z-[200]" id="custom-cursor">
         <div className="relative">
           <Heart size={28} className="text-red-500 fill-red-400 animate-pulse-soft" />
           <Sparkles size={12} className="absolute -top-1 -right-1 text-yellow-400 animate-spin-slow" />
         </div>
       </div>
+
+      {/* Persistent Floating Music Button (Hidden on Intro) */}
+      {step !== 'intro' && (
+        <div className="fixed top-6 right-6 z-[300] animate-in fade-in zoom-in duration-700">
+          <button
+            onClick={toggleCustomSong}
+            className={`group relative p-5 rounded-full shadow-2xl transition-all active:scale-90 border-4 border-white ${
+              isCustomSongPlaying 
+                ? 'bg-pink-500 text-white animate-pulse' 
+                : 'bg-white text-pink-500 hover:scale-110'
+            }`}
+          >
+            {isCustomSongPlaying ? <Music4 size={32} /> : <VolumeX size={32} />}
+            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest font-black whitespace-nowrap">
+              {isCustomSongPlaying ? 'Playing Song' : 'Play Music'}
+            </span>
+          </button>
+        </div>
+      )}
 
       {step === 'intro' && (
         <div className="z-10 w-full h-full flex flex-col items-center justify-center animate-in fade-in duration-1000">
@@ -212,7 +239,7 @@ const App: React.FC = () => {
         <div className="z-10 text-center px-6 animate-in fade-in slide-in-from-bottom-10 duration-1000 max-w-6xl w-full">
           <div className="mb-12 space-y-4">
             <Heart className="w-16 h-16 text-red-500 fill-red-500 mx-auto animate-pulse" />
-            <h2 className="text-6xl sm:text-8xl font-romantic text-red-900 italic tracking-tight">Choose Any</h2>
+            <h2 className="text-6xl sm:text-8xl font-romantic text-red-900 italic tracking-tight">Pick a Rose</h2>
             <div className="h-1.5 w-48 bg-gradient-to-r from-transparent via-pink-300 to-transparent mx-auto rounded-full"></div>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 md:gap-10 px-4">
@@ -276,12 +303,18 @@ const App: React.FC = () => {
                   onError={(e) => { 
                     (e.target as HTMLImageElement).style.display = 'none';
                     const parent = (e.target as HTMLElement).parentElement;
-                    if(parent) parent.innerHTML = '<div class="flex flex-col items-center gap-4 text-pink-400 font-romantic text-3xl p-10 text-center"><p>Missing your rose file</p><p class="text-xl">Please upload ' + wish.imageUrl + ' to the assets folder</p></div>';
+                    if(parent) {
+                      parent.innerHTML = `
+                        <div class="flex flex-col items-center gap-4 text-pink-400 font-romantic text-3xl p-10 text-center">
+                          <p>Image Not Found</p>
+                          <p class="text-xl">Make sure you created an 'assets' folder and put <b>${wish.imageUrl?.split('/').pop()}</b> inside it.</p>
+                        </div>`;
+                    }
                   }}
                 />
              </div>
              
-             {/* Highlighted Song Button */}
+             {/* Large Song Toggle Button */}
              <div className="w-full bg-white/80 backdrop-blur-3xl p-6 rounded-[2.5rem] border-2 border-pink-200 shadow-xl group relative overflow-hidden">
                 <button 
                   onMouseEnter={playHoverSound}
@@ -323,7 +356,11 @@ const App: React.FC = () => {
              <div className="flex flex-col sm:flex-row gap-6 pt-6 justify-center lg:justify-start">
                 <button 
                   onMouseEnter={playHoverSound}
-                  onClick={(e) => { e.stopPropagation(); spawnHearts(e); stopAllAudio(); setStep('choice'); }}
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    spawnHearts(e); 
+                    setStep('choice'); 
+                  }}
                   className="flex items-center justify-center gap-4 px-10 py-5 bg-white/90 border-2 border-pink-100 text-red-600 rounded-full hover:bg-white shadow-lg transition-all active:scale-90 group text-xl font-black"
                 >
                   <RotateCcw size={24} className="group-hover:rotate-180 transition-transform duration-700" />
