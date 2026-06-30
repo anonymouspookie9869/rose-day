@@ -1,20 +1,46 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# RosyLove - Rose Day Wishes
 
-# Run and deploy your AI Studio app
+A romantic, interactive web app for creating heartfelt Rose Day wishes with a beautiful rose-themed experience. Choose a rose color, personalize a message, and share a charming digital rose with your loved one.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1Aqkg7njgcCU37jXp328s7U6UkvpDXnZN
+- Beautiful animated rose experience
+- Multiple rose colors including red, pink, yellow, white, and blue
+- Personalized wish generation for Rose Day
+- Responsive and elegant UI
+- Easy local development with Vite
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+### Prerequisites
 
+- Node.js 18 or newer
+
+### Steps
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+2. Create a local environment file and add your Gemini API key if you want to enable AI-based message generation:
+   ```bash
+   echo "GEMINI_API_KEY=your_api_key_here" > .env.local
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open the local URL shown in the terminal, usually:
+   ```text
+   http://localhost:5173
+   ```
+
+## Build for Production
+
+```bash
+npm run build
+```
+
+## Project Notes
+
+This app is built with React, TypeScript, and Vite, and is designed to feel warm, expressive, and gift-like for special occasions.
